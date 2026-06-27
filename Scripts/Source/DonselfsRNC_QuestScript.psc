@@ -5,8 +5,9 @@ FormList Property RobotRaces Auto
 ReferenceAlias Property CompanionAlias Auto
 
 int TIMER_ID = 1 const
-string MOD_NAME = "Donself's Lone Wanderer - Robots Not Companions" const
-bool lastCompanionState = false
+string MOD_NAME = "Donself's RNC" const
+string VERSION = "1.0.2" const
+Actor lastCompanion = None
 
 Event OnInit()
     RegisterForRemoteEvent(Game.GetPlayer(), "OnPlayerLoadGame")
@@ -16,7 +17,7 @@ Event OnInit()
 EndEvent
 
 Event Actor.OnPlayerLoadGame(Actor akSender)
-    lastCompanionState = false
+    lastCompanion = None
     Utility.Wait(3.0)
     Debug.Notification(MOD_NAME + " active.")
     StartTimer(2.0, TIMER_ID)
@@ -26,11 +27,11 @@ Event OnTimer(int aiTimerID)
     If aiTimerID == TIMER_ID
         bool companionActive = PlayerHasActiveCompanion.GetValue() == 1.0
         If !companionActive
-            lastCompanionState = false
-        ElseIf !lastCompanionState
+            lastCompanion = None
+        Else
             Actor companion = CompanionAlias.GetActorRef()
-            If companion != None
-                lastCompanionState = true
+            If companion != None && companion != lastCompanion
+                lastCompanion = companion
                 If companion.IsPlayerTeammate()
                     Race companionRace = companion.GetRace()
                     If RobotRaces != None && RobotRaces.HasForm(companionRace)
