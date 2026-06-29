@@ -1,2 +1,9 @@
 # Compiled Papyrus scripts (build output)
 *.pex
+
+# Release package
+*.zip
+
+# Local only
+CLAUDE.md
+TODO.md
