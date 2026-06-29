@@ -5,9 +5,14 @@ FormList Property RobotRaces Auto
 ReferenceAlias Property CompanionAlias Auto
 FollowersScript Followers
 
+; th1nkEyebot optional compatibility
+Race EyebotRaceComparison
+Race EyebotRaceRagdoll
+Race EyebotRaceSubmersible
+
 int TIMER_ID = 1 const
 string MOD_NAME = "Donself's RNC" const
-string VERSION = "1.1.1" const
+string VERSION = "1.2.0" const
 
 Event OnInit()
     InitializeMod()
@@ -21,8 +26,15 @@ Function InitializeMod()
     RegisterForRemoteEvent(Game.GetPlayer(), "OnPlayerLoadGame")
     Followers = Game.GetForm(0x000289E4) as FollowersScript
     RegisterForCustomEvent(Followers, "CompanionChange")
+    LoadOptionalRaces()
     Debug.Notification(MOD_NAME + " active.")
     StartTimer(1.0, TIMER_ID)
+EndFunction
+
+Function LoadOptionalRaces()
+    EyebotRaceComparison  = Game.GetFormFromFile(0x000833, "th1nkEyebot.esp") as Race
+    EyebotRaceRagdoll     = Game.GetFormFromFile(0x00E1B3, "th1nkEyebot.esp") as Race
+    EyebotRaceSubmersible = Game.GetFormFromFile(0x01EC55, "th1nkEyebot.esp") as Race
 EndFunction
 
 Event FollowersScript.CompanionChange(FollowersScript akSender, Var[] akArgs)
@@ -40,7 +52,11 @@ Event OnTimer(int aiTimerID)
         Actor companion = CompanionAlias.GetActorRef()
         If companion != None && companion.IsPlayerTeammate()
             Race companionRace = companion.GetRace()
-            If RobotRaces != None && RobotRaces.HasForm(companionRace)
+            bool isRobot = (RobotRaces != None && RobotRaces.HasForm(companionRace)) || \
+                           (EyebotRaceComparison != None && companionRace == EyebotRaceComparison) || \
+                           (EyebotRaceRagdoll != None && companionRace == EyebotRaceRagdoll) || \
+                           (EyebotRaceSubmersible != None && companionRace == EyebotRaceSubmersible)
+            If isRobot
                 PlayerHasActiveCompanion.SetValue(0.0)
                 Debug.Notification(MOD_NAME + ": Lone Wanderer active.")
             EndIf
